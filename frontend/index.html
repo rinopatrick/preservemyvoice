@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f0f1a">
+    <title>PreserveMyVoice</title>
+    <style>
+        :root {
+            --bg: #0a0a14;
+            --bg-card: #121220;
+            --fg: #f0f0f0;
+            --fg-muted: #8888a0;
+            --accent: #ff6b6b;
+            --accent-glow: rgba(255, 107, 107, 0.3);
+            --border: #2a2a3a;
+            --success: #51cf66;
+            --radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(255,107,107,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(100,150,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .tagline {
+            color: var(--fg-muted);
+            font-size: 0.95rem;
+        }
+
+        .user-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .user-label {
+            color: var(--fg-muted);
+            font-size: 0.85rem;
+        }
+
+        .user-id {
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.9rem;
+            color: var(--accent);
+            background: rgba(255,107,107,0.1);
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+        }
+
+        .btn-copy {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--fg-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-desc {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .lang-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--fg);
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .lang-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .phrase-box {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 1.05rem;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .phrase-nav {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .btn-nav {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-nav:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .record-section {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .timer {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: var(--fg-muted);
+            margin-bottom: 1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .waveform-box {
+            height: 80px;
+            background: var(--bg);
+            border-radius: 10px;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #waveform { width: 100%; height: 100%; }
+
+        .btn-record {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .btn-record:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .btn-record.recording {
+            animation: pulse 1s infinite;
+            background: #ff5252;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+            50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px var(--accent-glow); }
+        }
+
+        .record-count {
+            color: var(--fg-muted);
+            font-size: 0.9rem;
+            margin-top: 0.75rem;
+        }
+
+        .btn-upload {
+            width: 100%;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .btn-upload:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-upload.visible { display: block; }
+
+        .voice-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .voice-item {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .voice-item:hover {
+            border-color: var(--accent);
+        }
+
+        .voice-item.selected {
+            border-color: var(--accent);
+            background: rgba(255,107,107,0.05);
+        }
+
+        .voice-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .voice-meta {
+            font-size: 0.8rem;
+            color: var(--fg-muted);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(81,207,102,0.2);
+            color: var(--success);
+        }
+
+        .badge-warn {
+            background: rgba(255,170,0,0.2);
+            color: #ffaa00;
+        }
+
+        .btn-create {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.75rem;
+        }
+
+        .btn-create:hover { opacity: 0.9; }
+        .btn-create:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--fg-muted);
+        }
+
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tts-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--fg);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tts-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--fg);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .tts-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn-tts {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.85rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-tts:hover { opacity: 0.9; }
+        .btn-tts:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .audio-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-play {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-play:hover { opacity: 0.9; }
+
+        .audio-info { flex: 1; min-width: 0; }
+
+        .audio-text {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .audio-time {
+            font-size: 0.75rem;
+            color: var(--fg-muted);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+
+        .toast {
+            padding: 0.85rem 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            animation: slideIn 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .toast-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast-error {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 1rem 1rem; }
+            .card { padding: 1rem; }
+            .logo { font-size: 1.5rem; }
+            .btn-record { width: 70px; height: 70px; font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">🗣️ <span>Preserve</span>MyVoice</h1>
+            <p class="tagline" data-t="tagline">Simpan suara Anda selamanya • Gratis • Lokal • Privat</p>
+        </header>
+
+        <div class="user-card">
+            <div>
+                <div class="user-label" data-t="userLabel">ID Pengguna</div>
+                <div class="user-id" id="userId">-</div>
+            </div>
+            <button class="btn-copy" onclick="copyUserId()" data-t="btnCopy">📋 Salin</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🎤 <span data-t="recTitle">Rekam Suara</span></div>
+            <p class="card-desc" data-t="recDesc">Baca frasa berikut dengan jelas. Minimal 5 rekaman untuk membuat model suara.</p>
+            
+            <select class="lang-select" id="langSelect">
+                <option value="id">🇮🇩 Bahasa Indonesia</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="fr">🇫🇷 Français</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="pt">🇵🇹 Português</option>
+                <option value="ja">🇯🇵 日本語</option>
+                <option value="ko">🇰🇷 한국어</option>
+                <option value="ar">🇸🇦 العربية</option>
+            </select>
+
+            <div class="phrase-box" id="phraseBox" data-t="phrasePlaceholder">Klik tombol rekam untuk mulai</div>
+            
+            <div class="phrase-nav">
+                <button class="btn-nav" onclick="prevPhrase()" data-t="btnPrev">◀ Sebelumnya</button>
+                <button class="btn-nav" onclick="nextPhrase()" data-t="btnNext">Berikutnya ▶</button>
+            </div>
+
+            <div class="record-section">
+                <div class="timer" id="timer">00:00</div>
+                <div class="waveform-box">
+                    <canvas id="waveform"></canvas>
+                </div>
+                <button class="btn-record" id="recordBtn" onclick="toggleRecord()">●</button>
+                <div class="record-count" id="recordCount" data-t="recCount">0 rekaman tersimpan</div>
+            </div>
+
+            <button class="btn-upload" id="uploadBtn" onclick="uploadAll()" data-t="btnUpload">✅ Upload Semua Rekaman</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🤖 <span data-t="modelsTitle">Model Suara Saya</span></div>
+            <p class="card-desc" data-t="modelsDesc">Model dari rekaman Anda. Gunakan untuk mengubah teks jadi suara Anda.</p>
+            
+            <div class="voice-grid" id="voiceList">
+                <div class="empty-state">
+                    <div class="empty-icon">🔊</div>
+                    <div data-t="emptyModels">Belum ada model suara</div>
+                    <div style="font-size:0.85rem;margin-top:0.5rem" data-t="emptyModelsHint">Upload rekaman untuk membuat model</div>
+                </div>
+            </div>
+
+            <button class="btn-create" id="createBtn" onclick="createModel()" disabled data-t="btnCreate">🚀 Buat Model Suara</button>
+        </div>
+
+        <div class="card">
+            <div class="card-title">💬 <span data-t="ttsTitle">Ubah Teks Jadi Suara</span></div>
+            <p class="card-desc" data-t="ttsDesc">Ketik pesan, ubah jadi suara Anda sendiri.</p>
+            
+            <select class="tts-select" id="voiceSelect" disabled>
+                <option value="" data-t="voiceSelectPlaceholder">Pilih model suara...</option>
+            </select>
+
+            <textarea class="tts-textarea" id="ttsInput" data-t="ttsPlaceholder" placeholder="Ketik pesan Anda di sini..." disabled></textarea>
+            
+            <button class="btn-tts" id="ttsBtn" onclick="generateTTS()" disabled data-t="btnTTS">▶ Ubah Jadi Suara</button>
+
+            <div id="audioList"></div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast"></div>
+
+    <script>
+        // ========== TRANSLATIONS ==========
+        const T = {
+          id: {
+            tagline: "Simpan suara Anda selamanya • Gratis • Lokal • Privat",
+            userLabel: "ID Pengguna",
+            btnCopy: "📋 Salin",
+            recTitle: "Rekam Suara",
+            recDesc: "Baca frasa berikut dengan jelas. Minimal 5 rekaman untuk membuat model suara.",
+            phrasePlaceholder: "Klik tombol rekam untuk mulai",
+            btnPrev: "◀ Sebelumnya",
+            btnNext: "Berikutnya ▶",
+            recCount: "rekaman tersimpan",
+            btnUpload: "✅ Upload Semua Rekaman",
+            modelsTitle: "Model Suara Saya",
+            modelsDesc: "Model dari rekaman Anda. Gunakan untuk mengubah teks jadi suara Anda.",
+            emptyModels: "Belum ada model suara",
+            emptyModelsHint: "Upload rekaman untuk membuat model",
+            btnCreate: "🚀 Buat Model Suara",
+            ttsTitle: "Ubah Teks Jadi Suara",
+            ttsDesc: "Ketik pesan, ubah jadi suara Anda sendiri.",
+            voiceSelectPlaceholder: "Pilih model suara...",
+            ttsPlaceholder: "Ketik pesan Anda di sini...",
+            btnTTS: "▶ Ubah Jadi Suara",
+            toastCreated: "Model berhasil dibuat!",
+            toastUpload: "Upload",
+            toastUploadOk: "rekaman berhasil",
+            toastUploadFail: "Upload gagal",
+            toastSaved: "Rekaman tersimpan",
+            toastNoMic: "Gagal akses mikrofon",
+            toastTTS: "Suara berhasil dibuat!",
+            toastTTSFail: "Gagal",
+            toastCopied: "ID disalin!",
+            statusCompleted: "selesai",
+            statusTraining: "melatih",
+            statusPending: "menunggu",
+            statusFailed: "gagal"
+          },
+          en: {
+            tagline: "Save your voice forever • Free • Local • Private",
+            userLabel: "User ID",
+            btnCopy: "📋 Copy",
+            recTitle: "Record Voice",
+            recDesc: "Read the phrases below clearly. Minimum 5 recordings to create a voice model.",
+            phrasePlaceholder: "Click record button to start",
+            btnPrev: "◀ Previous",
+            btnNext: "Next ▶",
+            recCount: "recordings saved",
+            btnUpload: "✅ Upload All Recordings",
+            modelsTitle: "My Voice Models",
+            modelsDesc: "Models from your recordings. Use to turn text into your voice.",
+            emptyModels: "No voice models yet",
+            emptyModelsHint: "Upload recordings to create a model",
+            btnCreate: "🚀 Create Voice Model",
+            ttsTitle: "Text to Speech",
+            ttsDesc: "Type a message, turn it into your voice.",
+            voiceSelectPlaceholder: "Select voice model...",
+            ttsPlaceholder: "Type your message here...",
+            btnTTS: "▶ Convert to Speech",
+            toastCreated: "Model created successfully!",
+            toastUpload: "Upload",
+            toastUploadOk: "recordings uploaded",
+            toastUploadFail: "Upload failed",
+            toastSaved: "Recording saved",
+            toastNoMic: "Failed to access microphone",
+            toastTTS: "Speech generated!",
+            toastTTSFail: "Failed",
+            toastCopied: "ID copied!",
+            statusCompleted: "completed",
+            statusTraining: "training",
+            statusPending: "pending",
+            statusFailed: "failed"
+          },
+          de: {
+            tagline: "Ihre Stimme für immer speichern • Kostenlos • Lokal • Privat",
+            userLabel: "Benutzer-ID",
+            btnCopy: "📋 Kopieren",
+            recTitle: "Stimme aufnehmen",
+            recDesc: "Lesen Sie die unten stehenden Sätze klar. Mindestens 5 Aufnahmen, um ein Stimmmodell zu erstellen.",
+            phrasePlaceholder: "Klicken Sie auf die Schaltfläche, um zu beginnen",
+            btnPrev: "◀ Zurück",
+            btnNext: "Weiter ▶",
+            recCount: "Aufnahmen gespeichert",
+            btnUpload: "✅ Alle Aufnahmen hochladen",
+            modelsTitle: "Meine Stimm-Modelle",
+            modelsDesc: "Modelle aus Ihren Aufnahmen. Verwenden Sie, um Text in Ihre Stimme umzuwandeln.",
+            emptyModels: "Noch keine Stimm-Modelle",
+            emptyModelsHint: "Laden Sie Aufnahmen hoch, um ein Modell zu erstellen",
+            btnCreate: "🚀 Stimm-Modell erstellen",
+            ttsTitle: "Text in Sprache",
+            ttsDesc: "Geben Sie eine Nachricht ein, verwandeln Sie sie in Ihre Stimme.",
+            voiceSelectPlaceholder: "Stimm-Modell auswählen...",
+            ttsPlaceholder: "Geben Sie Ihre Nachricht hier ein...",
+            btnTTS: "▶ In Sprache umwandeln",
+            toastCreated: "Modell erfolgreich erstellt!",
+            toastUpload: "Upload",
+            toastUploadOk: "Aufnahmen hochgeladen",
+            toastUploadFail: "Upload fehlgeschlagen",
+            toastSaved: "Aufnahme gespeichert",
+            toastNoMic: "Zugriff auf Mikrofon fehlgeschlagen",
+            toastTTS: "Sprache generiert!",
+            toastTTSFail: "Fehlgeschlagen",
+            toastCopied: "ID kopiert!",
+            statusCompleted: "fertig",
+            statusTraining: "trainieren",
+            statusPending: "ausstehend",
+            statusFailed: "fehlgeschlagen"
+          },
+          es: {
+            tagline: "Guarda tu voz para siempre • Gratis • Local • Privado",
+            userLabel: "ID de Usuario",
+            btnCopy: "📋 Copiar",
+            recTitle: "Grabar Voz",
+            recDesc: "Lee las frases a continuación claramente. Mínimo 5 grabaciones para crear un modelo de voz.",
+            phrasePlaceholder: "Haz clic en grabar para empezar",
+            btnPrev: "◀ Anterior",
+            btnNext: "Siguiente ▶",
+            recCount: "grabaciones guardadas",
+            btnUpload: "✅ Subir Todas las Grabaciones",
+            modelsTitle: "Mis Modelos de Voz",
+            modelsDesc: "Modelos de tus grabaciones. Úsalos para convertir texto en tu voz.",
+            emptyModels: "No hay modelos de voz aún",
+            emptyModelsHint: "Sube grabaciones para crear un modelo",
+            btnCreate: "🚀 Crear Modelo de Voz",
+            ttsTitle: "Texto a Voz",
+            ttsDesc: "Escribe un mensaje, conviértelo en tu voz.",
+            voiceSelectPlaceholder: "Seleccionar modelo de voz...",
+            ttsPlaceholder: "Escribe tu mensaje aquí...",
+            btnTTS: "▶ Convertir a Voz",
+            toastCreated: "¡Modelo creado exitosamente!",
+            toastUpload: "Subir",
+            toastUploadOk: "grabaciones subidas",
+            toastUploadFail: "Subida fallida",
+            toastSaved: "Grabación guardada",
+            toastNoMic: "Error al acceder al micrófono",
+            toastTTS: "¡Voz generada!",
+            toastTTSFail: "Error",
+            toastCopied: "¡ID copiado!",
+            statusCompleted: "completado",
+            statusTraining: "entrenando",
+            statusPending: "pendiente",
+            statusFailed: "fallido"
+          },
+          fr: {
+            tagline: "Enregistrez votre voix pour toujours • Gratuit • Local • Privé",
+            userLabel: "ID Utilisateur",
+            btnCopy: "📋 Copier",
+            recTitle: "Enregistrer Voix",
+            recDesc: "Lisez les phrases ci-dessous clairement. Minimum 5 enregistrements pour créer un modèle vocal.",
+            phrasePlaceholder: "Cliquez sur enregistrer pour commencer",
+            btnPrev: "◀ Précédent",
+            btnNext: "Suivant ▶",
+            recCount: "enregistrements sauvegardés",
+            btnUpload: "✅ Tout Téléverser",
+            modelsTitle: "Mes Modèles Vocaux",
+            modelsDesc: "Modèles de vos enregistrements. Utilisez-les pour transformer du texte en votre voix.",
+            emptyModels: "Aucun modèle vocal",
+            emptyModelsHint: "Téléversez des enregistrements pour créer un modèle",
+            btnCreate: "🚀 Créer Modèle Vocal",
+            ttsTitle: "Texte en Voix",
+            ttsDesc: "Tapez un message, transformez-le en votre voix.",
+            voiceSelectPlaceholder: "Sélectionner modèle...",
+            ttsPlaceholder: "Tapez votre message ici...",
+            btnTTS: "▶ Convertir en Voix",
+            toastCreated: "Modèle créé avec succès !",
+            toastUpload: "Téléversement",
+            toastUploadOk: "enregistrements téléversés",
+            toastUploadFail: "Échec du téléversement",
+            toastSaved: "Enregistrement sauvegardé",
+            toastNoMic: "Échec de l'accès au microphone",
+            toastTTS: "Voix générée !",
+            toastTTSFail: "Échec",
+            toastCopied: "ID copié !",
+            statusCompleted: "terminé",
+            statusTraining: "entraînement",
+            statusPending: "en attente",
+            statusFailed: "échec"
+          },
+          pt: {
+            tagline: "Salve sua voz para sempre • Grátis • Local • Privado",
+            userLabel: "ID do Usuário",
+            btnCopy: "📋 Copiar",
+            recTitle: "Gravar Voz",
+            recDesc: "Leia as frases abaixo claramente. Mínimo 5 gravações para criar um modelo de voz.",
+            phrasePlaceholder: "Clique em gravar para começar",
+            btnPrev: "◀ Anterior",
+            btnNext: "Próximo ▶",
+            recCount: "gravações salvas",
+            btnUpload: "✅ Enviar Todas as Gravações",
+            modelsTitle: "Meus Modelos de Voz",
+            modelsDesc: "Modelos de suas gravações. Use-os para transformar texto em sua voz.",
+            emptyModels: "Nenhum modelo de voz ainda",
+            emptyModelsHint: "Envie gravações para criar um modelo",
+            btnCreate: "🚀 Criar Modelo de Voz",
+            ttsTitle: "Texto para Voz",
+            ttsDesc: "Digite uma mensagem, transforme em sua voz.",
+            voiceSelectPlaceholder: "Selecionar modelo de voz...",
+            ttsPlaceholder: "Digite sua mensagem aqui...",
+            btnTTS: "▶ Converter para Voz",
+            toastCreated: "Modelo criado com sucesso!",
+            toastUpload: "Upload",
+            toastUploadOk: "gravações enviadas",
+            toastUploadFail: "Falha no envio",
+            toastSaved: "Gravação salva",
+            toastNoMic: "Falha ao acessar microfone",
+            toastTTS: "Voz gerada!",
+            toastTTSFail: "Falha",
+            toastCopied: "ID copiado!",
+            statusCompleted: "concluído",
+            statusTraining: "treinando",
+            statusPending: "pendente",
+            statusFailed: "falha"
+          },
+          ja: {
+            tagline: "あなたの声を永遠に保存 • 無料 • ローカル • プライベート",
+            userLabel: "ユーザーID",
+            btnCopy: "📋 コピー",
+            recTitle: "音声を録音",
+            recDesc: "以下のフレーズをはっきりと読んでください。音声モデルを作成するには最低5つの録音が必要です。",
+            phrasePlaceholder: "録音ボタンをクリックして開始",
+            btnPrev: "◀ 前へ",
+            btnNext: "次へ ▶",
+            recCount: "録音を保存",
+            btnUpload: "✅ すべての録音をアップロード",
+            modelsTitle: "マイボイスモデル",
+            modelsDesc: "録音からのモデル。テキストをあなたの声に変えるために使用します。",
+            emptyModels: "まだ音声モデルはありません",
+            emptyModelsHint: "モデルを作成するには録音をアップロードしてください",
+            btnCreate: "🚀 音声モデルを作成",
+            ttsTitle: "テキストを音声に",
+            ttsDesc: "メッセージを入力し、あなたの声に変えます。",
+            voiceSelectPlaceholder: "音声モデルを選択...",
+            ttsPlaceholder: "ここにメッセージを入力...",
+            btnTTS: "▶ 音声に変換",
+            toastCreated: "モデルが正常に作成されました！",
+            toastUpload: "アップロード",
+            toastUploadOk: "録音がアップロードされました",
+            toastUploadFail: "アップロードに失敗しました",
+            toastSaved: "録音を保存しました",
+            toastNoMic: "マイクへのアクセスに失敗しました",
+            toastTTS: "音声が生成されました！",
+            toastTTSFail: "失敗",
+            toastCopied: "IDをコピーしました！",
+            statusCompleted: "完了",
+            statusTraining: "トレーニング中",
+            statusPending: "保留中",
+            statusFailed: "失敗"
+          },
+          ko: {
+            tagline: "당신의 목소리를 영원히 저장 • 무료 • 로컬 • 프라이빗",
+            userLabel: "사용자 ID",
+            btnCopy: "📋 복사",
+            recTitle: "목소리 녹음",
+            recDesc: "아래 문장을 명확하게 읽어주세요. 음성 모델을 만들려면 최소 5개의 녹음이 필요합니다.",
+            phrasePlaceholder: "녹음 버튼을 클릭하여 시작",
+            btnPrev: "◀ 이전",
+            btnNext: "다음 ▶",
+            recCount: "녹음 저장됨",
+            btnUpload: "✅ 모든 녹음 업로드",
+            modelsTitle: "내 음성 모델",
+            modelsDesc: "녹음에서 만든 모델. 텍스트를 당신의 목소리로 바꾸는 데 사용합니다.",
+            emptyModels: "아직 음성 모델이 없습니다",
+            emptyModelsHint: "모델을 만들려면 녹음을 업로드하세요",
+            btnCreate: "🚀 음성 모델 만들기",
+            ttsTitle: "텍스트를 음성으로",
+            ttsDesc: "메시지를 입력하고 당신의 목소리로 바꿉니다.",
+            voiceSelectPlaceholder: "음성 모델 선택...",
+            ttsPlaceholder: "여기에 메시지를 입력하세요...",
+            btnTTS: "▶ 음성으로 변환",
+            toastCreated: "모델이 성공적으로 생성되었습니다!",
+            toastUpload: "업로드",
+            toastUploadOk: "녹음이 업로드되었습니다",
+            toastUploadFail: "업로드 실패",
+            toastSaved: "녹음이 저장되었습니다",
+            toastNoMic: "마이크 액세스 실패",
+            toastTTS: "음성이 생성되었습니다!",
+            toastTTSFail: "실패",
+            toastCopied: "ID가 복사되었습니다!",
+            statusCompleted: "완료",
+            statusTraining: "훈련 중",
+            statusPending: "대기 중",
+            statusFailed: "실패"
+          },
+          ar: {
+            tagline: "احفظ صوتك للأبد • مجاني • محلي • خاص",
+            userLabel: "معرف المستخدم",
+            btnCopy: "📋 نسخ",
+            recTitle: "تسجيل الصوت",
+            recDesc: "اقرأ الجمل أدناه بوضوح. الحد الأدنى 5 تسجيلات لإنشاء نموذج صوتي.",
+            phrasePlaceholder: "انقر فوق زر التسجيل للبدء",
+            btnPrev: "◀ السابق",
+            btnNext: "التالي ▶",
+            recCount: "التسجيلات المحفوظة",
+            btnUpload: "✅ تحميل جميع التسجيلات",
+            modelsTitle: "نماذج صوتي",
+            modelsDesc: "نماذج من تسجيلاتك. استخدمها لتحويل النص إلى صوتك.",
+            emptyModels: "لا توجد نماذج صوتية بعد",
+            emptyModelsHint: "قم بتحميل التسجيلات لإنشاء نموذج",
+            btnCreate: "🚀 إنشاء نموذج صوتي",
+            ttsTitle: "النص إلى صوت",
+            ttsDesc: "اكتب رسالة، حوّلها إلى صوتك.",
+            voiceSelectPlaceholder: "حدد نموذج الصوت...",
+            ttsPlaceholder: "اكتب رسالتك هنا...",
+            btnTTS: "▶ تحويل إلى صوت",
+            toastCreated: "تم إنشاء النموذج بنجاح!",
+            toastUpload: "تحميل",
+            toastUploadOk: "تم تحميل التسجيلات",
+            toastUploadFail: "فشل التحميل",
+            toastSaved: "تم حفظ التسجيل",
+            toastNoMic: "فشل الوصول إلى الميكروفون",
+            toastTTS: "تم إنشاء الصوت!",
+            toastTTSFail: "فشل",
+            toastCopied: "تم نسخ المعرف!",
+            statusCompleted: "مكتمل",
+            statusTraining: "التدريب",
+            statusPending: "قيد الانتظار",
+            statusFailed: "فشل"
+          }
+        };
+
+        // ========== Config ==========
+        const API = '/api/v1';
+        let uid = localStorage.getItem('uid');
+        if (!uid) { uid = 'u_' + Math.random().toString(36).slice(2,10); localStorage.setItem('uid', uid); }
+        document.getElementById('userId').textContent = uid;
+
+        // ========== State ==========
+        let curLang = 'id';
+        let isRec = false, recChunks = [], recTimer = null, recs = [], models = [], curIdx = 0;
+
+        // ========== Phrases per Language ==========
+        const phrases = {
+          id: ["Halo, apa kabar hari ini?", "Saya sangat mencintaimu.", "Tolong berikan garam.", "Jam berapa sekarang?", "Saya ingin secangkir teh.", "Cuaca hari ini indah.", "Bisakah Anda membantu saya?", "Terima kasih atas segalanya.", "Selamat pagi, hari yang menyenangkan.", "Nama saya adalah contoh."],
+          en: ["Hello, how are you today?", "I love you very much.", "Please pass the salt.", "What time is it?", "I would like a cup of tea.", "The weather is beautiful today.", "Can you help me with this?", "Thank you for everything.", "Good morning, have a nice day.", "The quick brown fox jumps over the lazy dog."],
+          es: ["Hola, ¿cómo estás hoy?", "Te amo mucho.", "Por favor, pásame la sal.", "¿Qué hora es?", "Me gustaría una taza de té.", "El clima está hermoso hoy.", "¿Puedes ayudarme con esto?", "Gracias por todo.", "Buenos días, que tengas un buen día.", "El rápido zorro marrón salta sobre el perro perezoso."],
+          fr: ["Bonjour, comment allez-vous aujourd'hui?", "Je t'aime beaucoup.", "S'il vous plaît, passez le sel.", "Quelle heure est-il?", "Je voudrais une tasse de thé.", "Le temps est magnifique aujourd'hui.", "Pouvez-vous m'aider avec ça?", "Merci pour tout.", "Bon matin, passez une bonne journée.", "Le rapide renard brun saute par-dessus le chien paresseux."],
+          de: ["Hallo, wie geht es Ihnen heute?", "Ich liebe dich sehr.", "Bitte reichen Sie das Salz.", "Wie spät ist es?", "Ich möchte eine Tasse Tee.", "Das Wetter ist heute wunderschön.", "Können Sie mir damit helfen?", "Danke für alles.", "Guten Morgen, ich wünsche Ihnen einen schönen Tag.", "Der schnelle braune Fuchs springt über den faulen Hund."],
+          pt: ["Olá, como você está hoje?", "Eu amo muito você.", "Por favor, passe o sal.", "Que horas são?", "Eu gostaria de uma xícara de chá.", "O clima está lindo hoje.", "Você pode me ajudar com isso?", "Obrigado por tudo.", "Bom dia, tenha um ótimo dia.", "A rápida raposa marrom salta sobre o cão preguiçoso."],
+          ja: ["こんにちは、お元気ですか？", "あなたをとても愛しています。", "塩を取ってください。", "今何時ですか？", "紅茶が飲みたいです。", "今日の天気はとてもいいです。", "これを手伝ってもらえますか？", "すべてをありがとう。", "おはよう、良い一日を。", "すばしこい茶色のキツネが、のろまな犬を飛び越えます。"],
+          ko: ["안녕하세요, 오늘 어떻게 지내세요?", "당신을 매우 사랑합니다.", "소금을 건네주세요.", "지금 몇 시입니까?", "차 한 잔을 원합니다.", "오늘 날씨가 아주 좋습니다.", "이것을 도와주실 수 있나요?", "모든 것에 감사합니다.", "좋은 아침, 좋은 하루 보내세요.", "재빠른 갈색 여우가 게으른 개를 뛰어넘습니다."],
+          ar: ["مرحباً، كيف حالك اليوم؟", "أحبك كثيراً.", "الرجاء تمرير الملح.", "ما الوقت الآن؟", "أود فنجان من الشاي.", "الطقس جميل اليوم.", "هل يمكنك مساعدتي في هذا؟", "شكراً على كل شيء.", "صباح الخير، أتمنى لك يومًا سعيدًا.", "الثعلب البني السريع يقفز فوق الكلب الكسول."]
+        };
+
+        // ========== Translate All ==========
+        function translateAll(lang) {
+          if (!T[lang]) lang = 'id';
+          curLang = lang;
+          document.documentElement.lang = lang;
+          document.querySelectorAll('[data-t]').forEach(el => {
+            const key = el.dataset.t;
+            if (T[lang][key]) el.textContent = T[lang][key];
+          });
+          // Update status badges
+          document.querySelectorAll('.voice-item').forEach((item, i) => {
+            const badge = item.querySelector('.badge');
+            if (badge && models[i]) {
+              const statusKey = 'status' + models[i].training_status.charAt(0).toUpperCase() + models[i].training_status.slice(1);
+              if (T[lang][statusKey]) {
+                const statusText = T[lang][statusKey];
+                // Keep the badge class, just update text
+                const cls = badge.className;
+                badge.textContent = statusText;
+              }
+            }
+          });
+          showPhrase();
+          updateRecCount();
+        }
+
+        // ========== Waveform ==========
+        function drawWave(data) {
+            const c = document.getElementById('waveform'), ctx = c.getContext('2d');
+            c.width = c.offsetWidth; c.height = c.offsetHeight;
+            if (!data || !data.length) { ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(0,0,c.width,c.height); return; }
+            const step=Math.ceil(data.length/c.width), amp=c.height/2;
+            ctx.strokeStyle='#ff6b6b'; ctx.lineWidth=2; ctx.beginPath();
+            for(let i=0;i<c.width;i++){
+                let min=1,max=-1;
+                for(let j=0;j<step;j++){ const idx=Math.floor(i*step+j); if(idx<data.length){ const v=data[idx]; if(v<min)min=v; if(v>max)max=v; }}
+                const x=i, y1=(1+min)*amp, y2=(1+max)*amp;
+                i===0?ctx.moveTo(x,y1):ctx.lineTo(x,y1);
+                ctx.lineTo(x,y2);
+            }
+            ctx.stroke();
+        }
+        function simWave(){ if(!isRec)return; const d=new Float32Array(200); for(let i=0;i<d.length;i++)d[i]=(Math.random()-0.5)*Math.random(); drawWave(d); setTimeout(simWave,100); }
+
+        // ========== Timer ==========
+        let tInt=null;
+        function startT(){ let s=0; tInt=setInterval(()=>{s++; const m=String(Math.floor(s/60)).padStart(2,'0'), ss=String(s%60).padStart(2,'0'); document.getElementById('timer').textContent=m+':'+ss; },1000); }
+        function stopT(){ clearInterval(tInt); }
+        function rstT(){ stopT(); document.getElementById('timer').textContent='00:00'; }
+
+        // ========== Recording ==========
+        let mRec=null;
+        async function toggleRecord(){
+            if(isRec){ stopRec(); } else { await startRec(); }
+        }
+        async function startRec(){
+            try{
+                const str=await navigator.mediaDevices.getUserMedia({audio:true});
+                mRec=new MediaRecorder(str); recChunks=[];
+                mRec.ondataavailable=e=>recChunks.push(e.data);
+                mRec.onstop=()=>str.getTracks().forEach(t=>t.stop());
+                mRec.start(); isRec=true; document.getElementById('recordBtn').classList.add('recording'); startT(); simWave();
+            }catch(e){ toast(T[curLang].toastNoMic,'error'); }
+        }
+        function stopRec(){
+            if(mRec&&isRec){
+                mRec.stop(); isRec=false; document.getElementById('recordBtn').classList.remove('recording'); stopT(); rstT(); drawWave([]);
+                const blob=new Blob(recChunks,{type:'audio/wav'});
+                recs.push({blob, phrase:phrases[curLang][curIdx], fname:'r_'+Date.now()+'.wav'});
+                updateRecCount(); toast(T[curLang].toastSaved,'success');
+                setTimeout(nextPhrase,1000);
+            }
+        }
+
+        // ========== Phrase ==========
+        function showPhrase(){ document.getElementById('phraseBox').textContent=phrases[curLang][curIdx]; }
+        function nextPhrase(){ if(isRec)stopRec(); curIdx=(curIdx+1)%phrases[curLang].length; showPhrase(); }
+        function prevPhrase(){ if(isRec)stopRec(); curIdx=(curIdx-1+phrases[curLang].length)%phrases[curLang].length; showPhrase(); }
+        document.getElementById('langSelect').addEventListener('change',e=>{ translateAll(e.target.value); });
+
+        // ========== Upload ==========
+        function updateRecCount(){ 
+            const el=document.getElementById('recordCount'); 
+            el.textContent=`${recs.length} ${T[curLang].recCount}`; 
+            document.getElementById('uploadBtn').classList.toggle('visible',recs.length>=5); 
+            document.getElementById('createBtn').disabled=recs.length<5; 
+        }
+        async function uploadAll(){
+            const btn=document.getElementById('uploadBtn'); btn.disabled=true; btn.textContent='⏳ '+T[curLang].toastUpload+'...';
+            let ok=0;
+            for(const r of recs){
+                try{
+                    const fd=new FormData(); fd.append('user_id',uid); fd.append('file',r.blob,r.fname); fd.append('phrase_text',r.phrase);
+                    const res=await fetch(API+'/recordings',{method:'POST',body:fd});
+                    if(res.ok){ const d=await res.json(); ok++; }
+                }catch(e){ console.error(e); }
+            }
+            recs=[]; updateRecCount(); btn.style.display='none';
+            toast(ok>0?`${T[curLang].toastUpload} ${ok} ${T[curLang].toastUploadOk}`:T[curLang].toastUploadFail,ok>0?'success':'error');
+            loadModels();
+        }
+
+        // ========== Models ==========
+        async function loadModels(){
+            try{
+                const res=await fetch(API+'/voice-models?user_id='+uid);
+                if(res.ok){ models=await res.json(); renderModels(); updateVoiceSel(); }
+            }catch(e){ console.error(e); }
+        }
+        function renderModels(){
+            const el=document.getElementById('voiceList');
+            if(models.length===0){ 
+              el.innerHTML=`<div class="empty-state"><div class="empty-icon">🔊</div><div data-t="emptyModels">${T[curLang].emptyModels}</div><div style="font-size:0.85rem;margin-top:0.5rem" data-t="emptyModelsHint">${T[curLang].emptyModelsHint}</div></div>`; 
+              return; 
+            }
+            el.innerHTML=models.map((m,i)=>`<div class="voice-item" onclick="selModel(${m.id},this)"><div class="voice-name">${m.model_name}</div><div class="voice-meta"><span class="badge ${m.training_status==='completed'?'badge-success':'badge-warn'}">${T[curLang]['status'+m.training_status.charAt(0).toUpperCase()+m.training_status.slice(1)]||m.training_status}</span> ${m.num_recordings} ${T[curLang].recCount}</div></div>`).join('');
+        }
+        let selMId=null;
+        function selModel(id,el){ selMId=id; document.querySelectorAll('.voice-item').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); }
+        async function createModel(){
+            const name=prompt(T[curLang].modelsTitle+':', T[curLang].modelsDesc.split('.')[0]); if(!name)return;
+            const btn=document.getElementById('createBtn'); btn.disabled=true; btn.textContent='🚀 '+T[curLang].statusTraining+'...';
+            try{
+                const recRes=await fetch(API+'/recordings?user_id='+uid);
+                if(recRes.ok){
+                    const allRecs=await recRes.json();
+                    const ids=allRecs.map(r=>r.id).slice(-recs.length);
+                    const fd=new FormData(); fd.append('user_id',uid); fd.append('model_name',name); fd.append('recording_ids',JSON.stringify(ids));
+                    const res=await fetch(API+'/voice-models',{method:'POST',body:fd});
+                    if(res.ok){ toast(T[curLang].toastCreated,'success'); loadModels(); } else { const e=await res.json(); toast(T[curLang].toastTTSFail+': '+e.detail,'error'); }
+                }
+            }catch(e){ toast(T[curLang].toastTTSFail+': '+e.message,'error'); }
+            btn.disabled=false; btn.textContent=T[curLang].btnCreate;
+        }
+
+        // ========== TTS ==========
+        function updateVoiceSel(){
+            const sel=document.getElementById('voiceSelect'), ready=models.filter(m=>m.training_status==='completed');
+            if(ready.length===0){ sel.innerHTML=`<option value="">${T[curLang].voiceSelectPlaceholder}</option>`; sel.disabled=true; document.getElementById('ttsInput').disabled=true; document.getElementById('ttsBtn').disabled=true; 
+              document.getElementById('ttsInput').placeholder=T[curLang].ttsPlaceholder; return; }
+            sel.innerHTML=`<option value="">${T[curLang].voiceSelectPlaceholder}</option>`+ready.map(m=>`<option value="${m.id}">${m.model_name}</option>`).join('');
+            sel.disabled=false; document.getElementById('ttsInput').disabled=false; document.getElementById('ttsBtn').disabled=false;
+            document.getElementById('ttsInput').placeholder=T[curLang].ttsPlaceholder;
+        }
+        async function generateTTS(){
+            const sel=document.getElementById('voiceSelect'), voiceId=sel.value, text=document.getElementById('ttsInput').value.trim();
+            if(!voiceId||!text)return;
+            const btn=document.getElementById('ttsBtn'); btn.disabled=true; btn.textContent='⏳ '+T[curLang].statusTraining+'...';
+            try{
+                const fd=new FormData(); fd.append('user_id',uid); fd.append('voice_model_id',voiceId); fd.append('text',text);
+                const res=await fetch(API+'/tts',{method:'POST',body:fd});
+                if(res.ok){
+                    const d=await res.json();
+                    const div=document.createElement('div'); div.className='audio-item';
+                    div.innerHTML=`<button class="btn-play" onclick="playAudio(this,'${d.output_path}')">▶</button><div class="audio-info"><div class="audio-text">${text.substring(0,50)}${text.length>50?'...':''}</div><div class="audio-time">${T[curLang].toastSaved}</div></div>`;
+                    document.getElementById('audioList').insertBefore(div,document.getElementById('audioList').firstChild);
+                    toast(T[curLang].toastTTS,'success');
+                }else{ const e=await res.json(); toast(T[curLang].toastTTSFail+': '+e.detail,'error'); }
+            }catch(e){ toast(T[curLang].toastTTSFail+': '+e.message,'error'); }
+            btn.disabled=false; btn.textContent=T[curLang].btnTTS;
+        }
+        function playAudio(btn,path){
+            document.querySelectorAll('.btn-play').forEach(b=>b.textContent='▶');
+            const a=new Audio(path); btn.textContent='⏸';
+            a.play().catch(()=>btn.textContent='▶');
+            a.onended=()=>btn.textContent='▶';
+        }
+
+        // ========== Toast ==========
+        function toast(msg,type='success'){
+            const c=document.getElementById('toast'), t=document.createElement('div');
+            t.className='toast toast-'+type; t.textContent=msg; c.appendChild(t);
+            setTimeout(()=>t.remove(),3000);
+        }
+
+        // ========== Copy UID ==========
+        function copyUserId(){ navigator.clipboard.writeText(uid).then(()=>toast(T[curLang].toastCopied,'success')); }
+
+        // ========== Init ==========
+        translateAll('id'); loadModels();
+    </script>
+</body>
+</html>
