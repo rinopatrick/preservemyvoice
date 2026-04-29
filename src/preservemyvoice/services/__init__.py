@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from ..domain import TTSGeneration, VoiceModel, VoiceRecording
 from ..exceptions import ModelNotFoundError
+from .tts_engine import TTSManager
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -20,6 +21,10 @@ class VoiceService:
 
         self.audio_processor = AudioProcessor()
         self.voice_cloner = VoiceCloner()
+        
+        # TTS manager with Piper as primary engine
+        models_dir = self.audio_processor.models_dir
+        self.tts_manager = TTSManager(models_dir)
 
     def create_recording(
         self,
@@ -88,7 +93,9 @@ class VoiceService:
         try:
             audio_files = [Path(r.filepath) for r in recordings]
             model_dir = self.audio_processor.models_dir / str(model.id)
-            result = self.voice_cloner.clone_voice(audio_files, model_dir, model_name)
+            result = self.voice_cloner.clone_voice(
+                audio_files, model_dir, model_name
+            )
 
             model.model_path = result["metadata_path"]
             model.training_status = "completed"
@@ -142,14 +149,19 @@ class VoiceService:
             ]
 
             if voice_samples:
-                output_path = self.voice_cloner.synthesize(
-                    text, output_path, voice_samples=voice_samples
+                output_path = self.tts_manager.synthesize(
+                    text, output_path, language="id",
+                    use_piper=True, voice_samples=voice_samples
+                )
+            else:
+                output_path = self.tts_manager.synthesize(
+                    text, output_path, language="id",
+                    use_piper=True
                 )
 
             duration = None
             try:
                 import librosa
-
                 y, sr = librosa.load(output_path)
                 duration = len(y) / sr
             except Exception:

@@ -159,6 +159,7 @@ async def generate_tts(
     user_id: str = Form(...),
     voice_model_id: int = Form(...),
     text: str = Form(...),
+    language: str = Form("id"),
     voice_service: VoiceService = Depends(get_voice_service),
 ):
     """Generate speech from text."""
